@@ -20,7 +20,7 @@ export const getAllNotesSchema = celebrate({
 
 export const noteIdSchema = celebrate({
   [Segments.PARAMS]: Joi.object({
-    noteId: Joi.string().custom(objectIdValidator),
+    noteId: Joi.string().custom(objectIdValidator).required(),
   }),
 });
 
@@ -34,7 +34,7 @@ export const createNoteSchema = celebrate({
 
 export const updateNoteSchema = celebrate({
   [Segments.PARAMS]: Joi.object({
-    noteId: Joi.string().custom(objectIdValidator),
+    noteId: Joi.string().custom(objectIdValidator).required(),
   }),
   [Segments.BODY]: Joi.object({
     title: Joi.string().min(1),
