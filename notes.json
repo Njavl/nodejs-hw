@@ -1,0 +1,27 @@
+[
+  {
+    "title": "Buy groceries",
+    "content": "Milk, eggs, bread, butter",
+    "tag": "Shopping"
+  },
+  {
+    "title": "Team standup",
+    "content": "Daily sync at 10:00 AM",
+    "tag": "Work"
+  },
+  {
+    "title": "Doctor appointment",
+    "content": "Annual checkup scheduled for next Monday",
+    "tag": "Health"
+  },
+  {
+    "title": "Read book",
+    "content": "Finish reading Clean Code",
+    "tag": "Personal"
+  },
+  {
+    "title": "Project deadline",
+    "content": "Submit final report by end of week",
+    "tag": "Important"
+  }
+]
