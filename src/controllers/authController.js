@@ -1,16 +1,13 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import path from 'node:path';
+import fs from 'node:fs/promises';
 import handlebars from 'handlebars';
 import createHttpError from 'http-errors';
 import { User } from '../models/user.js';
 import { Session } from '../models/session.js';
 import { createSession, setSessionCookies } from '../services/auth.js';
 import { sendEmail } from '../utils/sendMail.js';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export const registerUser = async (req, res) => {
   const { email, password } = req.body;
@@ -88,17 +85,18 @@ export const requestResetEmail = async (req, res) => {
       .json({ message: 'Password reset email sent successfully' });
   }
 
-  const token = jwt.sign(
-    { sub: user._id.toString(), email: user.email },
+  const resetToken = jwt.sign(
+    { sub: user._id, email },
     process.env.JWT_SECRET,
     { expiresIn: '15m' }
   );
 
-  const templatePath = join(__dirname, '../templates/reset-password-email.html');
-  const templateSource = readFileSync(templatePath, 'utf8');
-  const html = handlebars.compile(templateSource)({
-    username: user.username,
-    link: `${process.env.FRONTEND_DOMAIN}/reset-password?token=${token}`,
+  const templatePath = path.resolve('src/templates/reset-password-email.html');
+  const templateSource = await fs.readFile(templatePath, 'utf-8');
+  const template = handlebars.compile(templateSource);
+  const html = template({
+    name: user.username,
+    link: `${process.env.FRONTEND_DOMAIN}/reset-password?token=${resetToken}`,
   });
 
   try {
@@ -132,7 +130,9 @@ export const resetPassword = async (req, res) => {
   if (!user) throw createHttpError(404, 'User not found');
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  await User.findByIdAndUpdate(user._id, { password: hashedPassword });
+  await User.updateOne({ _id: user._id }, { password: hashedPassword });
+
+  await Session.deleteMany({ userId: user._id });
 
   res.status(200).json({ message: 'Password reset successfully' });
 };
